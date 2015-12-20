@@ -1,0 +1,22 @@
+{
+  "id": "nodebb-plugin-slack",
+  "name": "Some NodeBB slack integration",
+  "description": "For starters, includes an \"invite me to slack\" button",
+  "url": "https://github.com/CaptEmulation/nodebb-plugin-slack.git",
+  "library": "./library.js",
+  "hooks": [
+
+    { "hook": "filter:widgets.getWidgets", "method": "defineWidgets"},
+    { "hook": "filter:widget.render:slack-invite", "method": "renderSlackInvite"},
+    { "hook": "static:app.load", "method": "staticAppLoad" },
+    { "hook": "filter:admin.header.build", "method": "adminRoute" }
+  ],
+
+  "templates": "./templates",
+
+  "less": ["static/plugin-style.less"],
+
+  "scripts": ["static/plugin-script.js"],
+
+  "staticDirs": { "static": "./static" }
+}
