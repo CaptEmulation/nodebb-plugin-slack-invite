@@ -50,6 +50,7 @@
       }
       router.get('/slack', params.middleware.buildHeader, renderCustomPage);
 
+      SocketPlugins.slack = {};
       SocketPlugins.slack.invite = function (socket, params, callback) {
         winston.info('slack invite request received');
         slackInvite(socket);
