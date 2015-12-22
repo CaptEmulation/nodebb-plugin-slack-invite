@@ -4,7 +4,7 @@ var User = require('../nodebb').User;
 var winston = require('../nodebb').winston;
 var settings = require('./settings');
 
-function slackInvite(socket) {
+function slackInvite(socket, callback) {
   User.getUserFields(socket.uid, ['email'], function (err, userData) {
     var email = userData.email;
     var inviteToken = settings.get('slack.token');
@@ -19,6 +19,7 @@ function slackInvite(socket) {
       }
     }, function (err, httpResponse, body) {
       winston.info('Slack response ', body);
+      callback(err, JSON.parse(body));
     });
   });
 }
