@@ -65,8 +65,9 @@
 
       SocketPlugins.slack = {};
       SocketPlugins.slack.invite = function (socket, params, callback) {
-        winston.info('slack invite request received');
-        slackInvite(socket, callback);
+        User.getUserFields(socket.uid, ['email'], function (err, userData) {
+          slackInvite(userData.email, callback);
+        });
       };
 
       if (typeof callback === 'function') {
@@ -97,34 +98,16 @@
       });
     }, //defineWidgets
 
+    newUserInvite: function (data, callback) {
+      User.getUserFields(data.uid, ['email'], function (err, userData) {
+        slackInvite(userData.email, callback);
+      });
+    },
+
     renderSlackInvite: function(widget, callback) {
       app.render("widgets/widget.tpl", {dataExample: "Some Test Data", "adminSettingForWidget" : widget.adminSettingForWidget }, callback);
     }, //renderWidgetId
 
-/*
-    { "hook": "filter:register.build", "method": "addSlackInvite", "priority": 10 },
-    { "hook": "filter:register.check", "method": "newUserInvite", "priority": 10 }
-*/
-
-    addSlackInvite: function (data, callback) {
-      if (settings.feature.inviteOnJoin) {
-        var slackInvite = {
-            label: settings.strings.signup,
-            html: ''
-              + '<input id="slackInvite" type="checkbox"></input>'
-        };
-        if (data.templateData.regFormEntry && Array.isArray(data.templateData.regFormEntry)) {
-            data.templateData.regFormEntry.push(slackInvite);
-        } else {
-            data.templateData.captcha = slackInvite;
-        }
-      }
-      callback(null, data);
-    },
-
-    newUserInvite: function () {
-
-    }
   };
   module.exports = Plugin;
 
