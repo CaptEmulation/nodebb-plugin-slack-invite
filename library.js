@@ -8,9 +8,10 @@
 //var SocketPlugins = require.main.require('./src/socket.io/plugins');
 
   var winston = require('./nodebb').winston,
-      SocketPlugins = require('./nodebb').SocketPlugins,
-      plugins = require('./nodebb').plugins,
-      slackInvite = require('./src/slack-invite').slackInvite,
+    SocketPlugins = require('./nodebb').SocketPlugins,
+    plugins = require('./nodebb').plugins,
+    slackInvite = require('./src/slack-invite').slackInvite,
+    slackIsEmail = require('./src/slack-user').isEmail,
       User = require('./nodebb').User,
       _ = require('lodash'),
       settings,
@@ -42,11 +43,23 @@
       // });
 
       var renderCustomPage = function (req, res) {
+
         var uid = req.user ? parseInt(req.user.uid, 10) : 0;
-        User.getUserFields(uid, ['email'], function (err, userData) {
-          res.render('plugin-templates/slack-page.tpl',
-            _.assign({}, settings.get('invite'), userData));
-        });
+
+        if (uid) {
+          User.getUserFields(uid, ['email'], function (err, userData) {
+            slackIsEmail(userData.email).inList(function (err, member) {
+              if (member) {
+                res.render('plugin-templates/slack-page-already-joined.tpl');
+              } else {
+                res.render('plugin-templates/slack-page.tpl',
+                  _.assign({}, settings.get('invite'), userData));
+              }
+            });
+          });
+        } else {
+          res.render('plugin-templates/slack-page-not-logged-in.tpl');
+        }
       }
       router.get('/slack', params.middleware.buildHeader, renderCustomPage);
 
